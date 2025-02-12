@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Price Drop Alert</title>
+    {% load static %}
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="{% static 'tracker/styles.css' %}">    
+    
+</head>
+<body>
+    <div class="main-container">
+        <!-- Slider Section -->
+        <div class="slider-container">
+            <div class="slide active">
+                <div class="slide-content">
+                    <h2>Track Prices Effortlessly</h2>
+                    <p>Get notified instantly when prices drop on your favorite products</p>
+                </div>
+                <img src="{% static 'tracker/images/slide1.jpg' %}" alt="Price Tracking">
+            </div>
+            <div class="slide">
+                <div class="slide-content">
+                    <h2>Save Money Automatically</h2>
+                    <p>Never miss a price drop with our automated tracking system</p>
+                </div>
+                <img src="{% static 'tracker/images/slide2.jpg' %}" alt="Save Money">
+            </div>
+            <div class="slide">
+                <div class="slide-content">
+                    <h2>Smart Shopping Made Easy</h2>
+                    <p>Shop smarter with real-time price alerts and notifications</p>
+                </div>
+                <img src="{% static 'tracker/images/slide3.jpg' %}" alt="Smart Shopping">
+            </div>
+
+            <div class="slider-nav">
+                <span class="slider-dot active"></span>
+                <span class="slider-dot"></span>
+                <span class="slider-dot"></span>
+            </div>
+
+            <div class="slider-arrow prev">
+                <i class="fas fa-chevron-left"></i>
+            </div>
+            <div class="slider-arrow next">
+                <i class="fas fa-chevron-right"></i>
+            </div>
+        </div>
+
+        <!-- Start Container -->
+        <div class="start-container" id="startContainer">
+            <i class="fas fa-bullseye price-target-icon"></i>
+            <h2>Start Price Tracking Journey</h2>
+            <p class="start-description">
+                Set your target price and let us monitor it for you. We'll notify you when the price drops to your desired level.
+            </p>
+            
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <i class="fas fa-bell"></i>
+                    <h3>Price Alerts</h3>
+                    <p>Get instant notifications when prices drop</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Price Tracking</h3>
+                    <p>Monitor price changes in real-time</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-envelope"></i>
+                    <h3>Email Updates</h3>
+                    <p>Receive updates directly in your inbox</p>
+                </div>
+            </div>
+
+            <button onclick="showForm()" class="start-button">
+                <i class="fas fa-crosshairs"></i>
+                Start Targeting
+            </button>
+        </div>
+
+        <!-- Form Container -->
+        <div class="form-container" id="formContainer" style="display: none;">
+            <div class="form-header">
+                <h2>Set Your Target Price</h2>
+                <p>Enter product details and your desired price</p>
+            </div>
+            
+            <form id="priceForm" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="url_link">Product URL</label>
+                    <div class="input-wrapper">
+                        <input type="url" id="url_link" name="url_link" 
+                               placeholder="Enter Flipkart product URL"
+                               pattern="https?://.*flipkart\.com.*"
+                               required>
+                        <i class="fas fa-link input-icon"></i>
+                        <span class="validation-message">Please enter a valid Flipkart URL</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="target_price">Target Price (₹)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="target_price" name="target_price" 
+                               placeholder="Enter your desired price"
+                               min="1" step="1" required>
+                        <i class="fas fa-rupee-sign input-icon"></i>
+                        <span class="validation-message">Please enter a valid price</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-wrapper">
+                        <input type="email" id="email" name="email" 
+                               placeholder="Enter your email for notifications"
+                               required>
+                        <i class="fas fa-envelope input-icon"></i>
+                        <span class="validation-message">Please enter a valid email address</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-button">
+                    <i class="fas fa-crosshairs"></i>
+                    Set Price Target
+                </button>
+            </form>
+        </div>
+
+        <!-- Loading Spinner Container -->
+        <div id="loadingContainer" style="display: none;" class="animate__animated animate__fadeIn">
+            <div class="loading-message">
+                <div class="spinner"></div>
+                <h2>Processing Your Request</h2>
+                <p>Please wait while we set up your price alert...</p>
+            </div>
+        </div>
+
+        <!-- Success Container -->
+        <div class="success-container" id="successContainer" style="display: none;">
+            <i class="fas fa-check-circle success-icon"></i>
+            <h2 class="success-title">Successfully Registered!</h2>
+            <p class="success-message">We'll notify you when the price drops below your target.</p>
+            
+            <div class="success-details">
+                <div class="details-label">Confirmation email sent to:</div>
+                <div class="success-email" id="userEmail">loading...</div>
+                
+                <div class="details-label">Target Price:</div>
+                <div class="success-price">₹<span id="targetPrice">loading...</span></div>
+            </div>
+
+            <button onclick="resetForm()" class="reset-button">
+                <i class="fas fa-plus-circle"></i>
+                Set Another Target Price
+            </button>
+        </div>
+
+        <!-- Audio Elements -->
+     
+
+        <script>
+            // Pass Django template variables to JavaScript
+            window.djangoData = {
+                email: '{{ email|default:"" }}',
+                targetPrice: '{{ target_price|default:"" }}',
+                productName: '{{ product_name|default:"" }}'
+            };
+        </script>
+        <script src="{% static 'tracker/js/scripts.js' %}"></script>
+    </body>
+</html>
